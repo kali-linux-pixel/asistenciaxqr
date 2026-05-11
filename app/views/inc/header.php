@@ -6,8 +6,31 @@
     <title><?php echo SITENAME; ?> - <?php echo $data['title'] ?? ''; ?></title>
     <link rel="stylesheet" href="<?php echo URLROOT; ?>/css/style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        /* Global Dynamic Loading Bar */
+        #top-progress-bar {
+            position: fixed;
+            top: 0; left: 0; height: 3px;
+            background: linear-gradient(to right, #6366f1, #a855f7, #ec4899);
+            z-index: 9999; width: 0%;
+            transition: width 0.4s ease;
+            box-shadow: 0 0 10px rgba(99,102,241,0.5);
+        }
+        
+        /* Page Fade In Effect */
+        body { animation: fadeIn 0.5s ease; }
+        @keyframes fadeIn { from { opacity: 0.2; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+        
+        /* Active Nav Tint */
+        .nav-link.active {
+            background: linear-gradient(90deg, rgba(99,102,241,0.15) 0%, transparent 100%);
+            border-left: 3px solid var(--primary);
+            color: white !important;
+        }
+    </style>
 </head>
 <body>
+    <div id="top-progress-bar"></div>
     <?php if(isLoggedIn()) : ?>
     <div class="app-layout">
         <!-- Sidebar -->

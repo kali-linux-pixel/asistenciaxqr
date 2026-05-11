@@ -1,60 +1,100 @@
 <?php require APPROOT . '/views/inc/header.php'; ?>
 
-<div class="glass-card" style="margin-bottom: 1.5rem; padding: 1.5rem;">
-    <form method="GET" action="<?php echo URLROOT; ?>/reportes/permisos" style="display:flex; gap:10px; align-items:flex-end; flex-wrap:wrap;">
-        <div style="flex:1; min-width: 150px;">
-            <label>Fecha:</label>
-            <input type="date" name="fecha" class="form-control" value="<?php echo $data['fecha']; ?>" style="background:#0f172a;">
+<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem; margin-bottom: 2rem;">
+    <!-- Filter Control Box -->
+    <div class="glass-card" style="padding: 1.5rem; display:flex; align-items:center;">
+        <form method="GET" action="<?php echo URLROOT; ?>/reportes/permisos" style="width:100%; display:flex; gap:12px; align-items:center;">
+            <div style="flex:1;">
+                <label style="margin-bottom: 3px; font-size:0.8rem;">Filtrar Historial de Permisos:</label>
+                <div style="position:relative;">
+                    <i class="fa-regular fa-calendar" style="position:absolute; left:12px; top:50%; transform:translateY(-50%); color:var(--gray);"></i>
+                    <input type="date" name="fecha" class="form-control" value="<?php echo $data['fecha']; ?>" style="background:rgba(0,0,0,0.2); padding-left:35px; border-radius:8px;">
+                </div>
+            </div>
+            <button type="submit" class="btn btn-primary" style="height:45px; margin-top:18px; border-radius:8px; background:var(--secondary);">
+                <i class="fa-solid fa-sync-alt"></i>
+            </button>
+        </form>
+    </div>
+
+    <!-- Live Search & Export Panel -->
+    <div class="glass-card" style="padding: 1.5rem; display:flex; align-items:center; gap: 12px;">
+        <div style="flex:1; position:relative;">
+            <i class="fa-solid fa-search" style="position:absolute; left:12px; top:50%; transform:translateY(-50%); color:var(--gray);"></i>
+            <input type="text" id="permisoSearch" placeholder="Filtrar en vivo por alumno o motivo..." style="width:100%; padding:12px 12px 12px 35px; border-radius:8px; background:rgba(255,255,255,0.02); border:1px solid var(--glass-border); color:#fff; outline:none;">
         </div>
-        <div style="display: flex; gap: 10px;">
-            <button type="submit" class="btn btn-outline" style="height:45px;">Filtrar</button>
-            <a href="<?php echo URLROOT; ?>/reportes/exportar?tipo=permiso&fecha=<?php echo $data['fecha']; ?>" class="btn btn-primary" style="height:45px; background:#10b981;">
-                <i class="fa-solid fa-file-csv"></i> Excel
-            </a>
-        </div>
-    </form>
+        <a href="<?php echo URLROOT; ?>/reportes/exportar?tipo=permiso&fecha=<?php echo $data['fecha']; ?>" class="btn btn-primary" style="background: linear-gradient(135deg, #10b981, #059669); height:45px; border-radius:8px; font-weight:700;">
+            <i class="fa-solid fa-file-excel"></i> Exportar
+        </a>
+    </div>
 </div>
 
-<div class="glass-card">
-    <table>
-        <thead>
-            <tr>
-                <th>Alumno</th>
-                <th>Motivo</th>
-                <th>Salida</th>
-                <th>Retorno</th>
-                <th>Estado</th>
-            </tr>
-        </thead>
-        <tbody>
-            <?php foreach($data['registros'] as $r): ?>
-            <tr>
-                <td><?php echo htmlspecialchars($r['nombres']); ?></td>
-                <td style="font-weight:600;"><?php echo $r['motivo']; ?></td>
-                <td>
-                    <?php echo date('h:i A', strtotime($r['hora_salida'])); ?>
-                    <br>
-                    <small style="color:#94a3b8;">Vence: <?php echo date('h:i A', strtotime($r['hora_estimada_retorno'])); ?></small>
-                </td>
-                <td><?php echo $r['hora_retorno'] ? date('h:i A', strtotime($r['hora_retorno'])) : '--:--'; ?></td>
-                <td>
-                    <?php 
-                    if ($r['estado'] == 'Pendiente') {
-                        $horaActual = date('H:i:s');
-                        if ($horaActual > $r['hora_estimada_retorno']) {
-                            echo '<span class="badge badge-danger" style="animation: pulse 2s infinite;"><i class="fa-solid fa-triangle-exclamation"></i> ATRASADO</span>';
-                        } else {
-                            echo '<span class="badge badge-warning">Fuera</span>';
-                        }
-                    } else {
-                        echo '<span class="badge badge-success">Volvió</span>';
-                    }
-                    ?>
-                </td>
-            </tr>
-            <?php endforeach; ?>
-        </tbody>
-    </table>
+<div class="glass-card" style="padding:0; overflow:hidden; border-radius:15px;">
+    <div style="padding:1.5rem; border-bottom:1px solid var(--glass-border); background:rgba(255,255,255,0.01);">
+        <h3 style="margin:0; font-size:1rem;"><i class="fa-solid fa-user-shield" style="color:var(--warning); margin-right:8px;"></i> Listado de Papeletas y Movimiento</h3>
+    </div>
+    <div style="overflow-x: auto;">
+        <table id="permisosTable" style="margin:0;">
+            <thead>
+                <tr style="background: rgba(0,0,0,0.1);">
+                    <th style="padding-left:1.5rem;">Estudiante</th>
+                    <th>Razón / Motivo</th>
+                    <th>Cronología Salida</th>
+                    <th>Hora Retorno</th>
+                    <th style="padding-right:1.5rem;">Situación</th>
+                </tr>
+            </thead>
+            <tbody>
+                <?php if(empty($data['registros'])): ?>
+                    <tr><td colspan="5" style="text-align:center; color:var(--gray); padding:40px;">No se registraron permisos el día seleccionado.</td></tr>
+                <?php else: ?>
+                    <?php foreach($data['registros'] as $r): ?>
+                    <tr style="transition:all 0.2s;" onmouseover="this.style.background='rgba(255,255,255,0.03)'" onmouseout="this.style.background='transparent'">
+                        <td style="padding-left:1.5rem; font-weight:600; color:#fff;"><?php echo htmlspecialchars($r['nombres']); ?></td>
+                        <td>
+                            <span style="background:rgba(245,158,11,0.1); color:var(--warning); padding:4px 10px; border-radius:6px; font-weight:600; font-size:0.85rem;">
+                                <?php echo $r['motivo']; ?>
+                            </span>
+                        </td>
+                        <td>
+                            <div style="font-size:0.9rem; color:#fff; font-weight:500;"><?php echo date('h:i A', strtotime($r['hora_salida'])); ?></div>
+                            <div style="font-size:0.75rem; color:var(--gray);">Límite: <?php echo date('h:i A', strtotime($r['hora_estimada_retorno'])); ?></div>
+                        </td>
+                        <td>
+                            <?php if($r['hora_retorno']): ?>
+                                <strong style="color:#34d399;"><?php echo date('h:i A', strtotime($r['hora_retorno'])); ?></strong>
+                            <?php else: ?>
+                                <span style="color:var(--gray); font-style:italic;">--:--</span>
+                            <?php endif; ?>
+                        </td>
+                        <td style="padding-right:1.5rem;">
+                            <?php 
+                            if ($r['estado'] == 'Pendiente') {
+                                $horaActual = date('H:i:s');
+                                if ($horaActual > $r['hora_estimada_retorno']) {
+                                    echo '<span class="badge badge-danger" style="animation: pulse 1.5s infinite; display:inline-flex; align-items:center; gap:5px;"><i class="fa-solid fa-triangle-exclamation"></i> SOBREPASADO</span>';
+                                } else {
+                                    echo '<span class="badge badge-warning" style="display:inline-flex; align-items:center; gap:5px;"><i class="fa-solid fa-hourglass-half"></i> FUERA</span>';
+                                }
+                            } else {
+                                echo '<span class="badge badge-success" style="display:inline-flex; align-items:center; gap:5px;"><i class="fa-solid fa-check-circle"></i> DENTRO</span>';
+                            }
+                            ?>
+                        </td>
+                    </tr>
+                    <?php endforeach; ?>
+                <?php endif; ?>
+            </tbody>
+        </table>
+    </div>
 </div>
+
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+    if(typeof filterTable === "function") {
+        filterTable('permisoSearch', 'permisosTable');
+    }
+});
+</script>
 
 <?php require APPROOT . '/views/inc/footer.php'; ?>

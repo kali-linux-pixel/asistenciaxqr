@@ -1,41 +1,86 @@
 <?php require APPROOT . '/views/inc/header.php'; ?>
 
-<div class="glass-card" style="margin-bottom: 1.5rem; padding: 1.5rem;">
-    <form method="GET" action="<?php echo URLROOT; ?>/reportes/asistencias" style="display:flex; gap:10px; align-items:flex-end; flex-wrap:wrap;">
-        <div style="flex:1; min-width: 150px;">
-            <label>Fecha:</label>
-            <input type="date" name="fecha" class="form-control" value="<?php echo $data['fecha']; ?>" style="background:#0f172a;">
+<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem; margin-bottom: 2rem;">
+    <!-- Filter Control Box -->
+    <div class="glass-card" style="padding: 1.5rem; display:flex; align-items:center;">
+        <form method="GET" action="<?php echo URLROOT; ?>/reportes/asistencias" style="width:100%; display:flex; gap:12px; align-items:center;">
+            <div style="flex:1;">
+                <label style="margin-bottom: 3px; font-size:0.8rem;">Filtrar Fecha de Base de Datos:</label>
+                <div style="position:relative;">
+                    <i class="fa-regular fa-calendar" style="position:absolute; left:12px; top:50%; transform:translateY(-50%); color:var(--gray);"></i>
+                    <input type="date" name="fecha" class="form-control" value="<?php echo $data['fecha']; ?>" style="background:rgba(0,0,0,0.2); padding-left:35px; border-radius:8px;">
+                </div>
+            </div>
+            <button type="submit" class="btn btn-primary" style="height:45px; margin-top:18px; border-radius:8px; background:var(--secondary);">
+                <i class="fa-solid fa-sync-alt"></i>
+            </button>
+        </form>
+    </div>
+
+    <!-- Live Search & Export Panel -->
+    <div class="glass-card" style="padding: 1.5rem; display:flex; align-items:center; gap: 12px;">
+        <div style="flex:1; position:relative;">
+            <i class="fa-solid fa-search" style="position:absolute; left:12px; top:50%; transform:translateY(-50%); color:var(--gray);"></i>
+            <input type="text" id="reportSearch" placeholder="Búsqueda rápida en pantalla..." style="width:100%; padding:12px 12px 12px 35px; border-radius:8px; background:rgba(255,255,255,0.02); border:1px solid var(--glass-border); color:#fff; outline:none;">
         </div>
-        <div style="display: flex; gap: 10px;">
-            <button type="submit" class="btn btn-outline" style="height:45px;">Filtrar</button>
-            <a href="<?php echo URLROOT; ?>/reportes/exportar?tipo=asistencia&fecha=<?php echo $data['fecha']; ?>" class="btn btn-primary" style="height:45px; background:#10b981;">
-                <i class="fa-solid fa-file-csv"></i> Excel
-            </a>
-        </div>
-    </form>
+        <a href="<?php echo URLROOT; ?>/reportes/exportar?tipo=asistencia&fecha=<?php echo $data['fecha']; ?>" class="btn btn-primary" style="background: linear-gradient(135deg, #10b981, #059669); height:45px; border-radius:8px; font-weight:700;">
+            <i class="fa-solid fa-file-excel"></i> Exportar
+        </a>
+    </div>
 </div>
 
-<div class="glass-card">
-    <table>
-        <thead>
-            <tr>
-                <th>Alumno</th>
-                <th>Grado</th>
-                <th>Entrada</th>
-                <th>Salida</th>
-            </tr>
-        </thead>
-        <tbody>
-            <?php foreach($data['registros'] as $r): ?>
-            <tr>
-                <td style="font-weight:600;"><?php echo htmlspecialchars($r['apellidos'] . ', ' . $r['nombres']); ?></td>
-                <td><?php echo $r['grado'] . ' ' . $r['seccion']; ?></td>
-                <td style="color:#34d399;"><?php echo date('h:i A', strtotime($r['hora_entrada'])); ?></td>
-                <td><?php echo $r['hora_salida'] ? date('h:i A', strtotime($r['hora_salida'])) : '--:--'; ?></td>
-            </tr>
-            <?php endforeach; ?>
-        </tbody>
-    </table>
+<!-- Data Table Container -->
+<div class="glass-card" style="padding:0; overflow:hidden; border-radius:15px;">
+    <div style="padding:1.5rem; border-bottom:1px solid var(--glass-border); background:rgba(255,255,255,0.01);">
+        <h3 style="margin:0; font-size:1rem;"><i class="fa-solid fa-table-list" style="color:var(--primary); margin-right:8px;"></i> Registros del Día (<?php echo date('d/m/Y', strtotime($data['fecha'])); ?>)</h3>
+    </div>
+    <div style="overflow-x: auto;">
+        <table id="recordsTable" style="margin:0;">
+            <thead>
+                <tr style="background: rgba(0,0,0,0.1);">
+                    <th style="padding-left:1.5rem;">Alumno Matriculado</th>
+                    <th>Sección / Aula</th>
+                    <th><i class="fa-solid fa-sign-in-alt" style="color:#10b981; margin-right:5px;"></i> Hora Entrada</th>
+                    <th style="padding-right:1.5rem;"><i class="fa-solid fa-sign-out-alt" style="color:#f43f5e; margin-right:5px;"></i> Hora Salida</th>
+                </tr>
+            </thead>
+            <tbody>
+                <?php if(empty($data['registros'])): ?>
+                    <tr><td colspan="4" style="text-align:center; color:var(--gray); padding:40px;">No se encontraron registros para esta fecha.</td></tr>
+                <?php else: ?>
+                    <?php foreach($data['registros'] as $r): ?>
+                    <tr style="transition:all 0.2s;" onmouseover="this.style.background='rgba(255,255,255,0.03)'" onmouseout="this.style.background='transparent'">
+                        <td style="padding-left:1.5rem;">
+                            <div style="display:flex; align-items:center; gap:10px;">
+                                <div style="width:30px; height:30px; background:rgba(99,102,241,0.1); border-radius:50%; display:flex; align-items:center; justify-content:center; color:var(--primary); font-weight:bold; font-size:0.75rem;">
+                                    <?php echo substr($r['apellidos'],0,1); ?>
+                                </div>
+                                <span style="font-weight:600;"><?php echo htmlspecialchars($r['apellidos'] . ', ' . $r['nombres']); ?></span>
+                            </div>
+                        </td>
+                        <td><span style="background:rgba(255,255,255,0.05); padding:3px 8px; border-radius:5px; font-size:0.8rem;"><?php echo $r['grado'] . ' - ' . $r['seccion']; ?></span></td>
+                        <td style="color:#34d399; font-weight:700;"><?php echo date('h:i A', strtotime($r['hora_entrada'])); ?></td>
+                        <td style="padding-right:1.5rem;">
+                            <?php if($r['hora_salida']): ?>
+                                <span style="color:#fca5a5; font-weight:700;"><?php echo date('h:i A', strtotime($r['hora_salida'])); ?></span>
+                            <?php else: ?>
+                                <span style="color:var(--gray); font-style:italic; font-size:0.85rem;">Pendiente</span>
+                            <?php endif; ?>
+                        </td>
+                    </tr>
+                    <?php endforeach; ?>
+                <?php endif; ?>
+            </tbody>
+        </table>
+    </div>
 </div>
+
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+    if(typeof filterTable === "function") {
+        filterTable('reportSearch', 'recordsTable');
+    }
+});
+</script>
 
 <?php require APPROOT . '/views/inc/footer.php'; ?>
