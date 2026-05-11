@@ -1,4 +1,6 @@
 <?php
+// Set Default Global Timezone (Lima/Peru)
+date_default_timezone_set('America/Lima');
 // Smart detection for Docker/Production environment variables
 function get_env_var($key, $default = '') {
     $val = $_ENV[$key] ?? $_SERVER[$key] ?? getenv($key);

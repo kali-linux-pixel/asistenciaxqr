@@ -37,9 +37,12 @@ class Database {
         try {
             $this->dbh = new PDO($dsn, $user, $pass, $options);
             
-            // Check if Postgres needs schema initialization
+            // --- FORCE LIMA TIMEZONE FOR BOTH ENGINES ---
             if (strpos($dsn, 'pgsql') !== false) {
+                $this->dbh->exec("SET timezone TO 'America/Lima';");
                 $this->initPostgresSchema();
+            } else {
+                $this->dbh->exec("SET time_zone = '-05:00';");
             }
         } catch(PDOException $e) {
             $this->error = $e->getMessage();
