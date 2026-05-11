@@ -19,6 +19,7 @@ class Pages extends Controller {
         $permisosActivos = $this->permisoModel->getCountActive();
         $recientes = $this->asistenciaModel->getRecientes();
         $stats = $this->asistenciaModel->getWeeklyStats();
+        $motivoStats = $this->permisoModel->getStatsByMotivo();
 
         $data = [
             'title' => 'Panel de Control',
@@ -26,7 +27,8 @@ class Pages extends Controller {
             'totalAsistencias' => $totalAsistencias,
             'permisosActivos' => $permisosActivos,
             'recientes' => $recientes,
-            'stats' => $stats
+            'stats' => $stats,
+            'motivoStats' => $motivoStats
         ];
 
         $this->view('pages/index', $data);

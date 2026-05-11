@@ -12,6 +12,15 @@ class Permiso {
         return $row['total'];
     }
 
+    public function getStatsByMotivo() {
+        $this->db->query("
+            SELECT motivo, COUNT(*) as total 
+            FROM permisos 
+            GROUP BY motivo
+        ");
+        return $this->db->resultSet();
+    }
+
     public function hasPending($alumno_id) {
         $this->db->query("SELECT id FROM permisos WHERE alumno_id = :aid AND estado = 'Pendiente'");
         $this->db->bind(':aid', $alumno_id);
