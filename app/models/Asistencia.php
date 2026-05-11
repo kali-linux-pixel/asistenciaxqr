@@ -13,13 +13,15 @@ class Asistencia {
     }
 
     public function getWeeklyStats() {
+        $threshold = date('Y-m-d', strtotime('-6 days'));
         $this->db->query("
             SELECT fecha, COUNT(*) as total 
             FROM asistencias 
-            WHERE fecha >= DATE_SUB(CURRENT_DATE, INTERVAL 6 DAY)
+            WHERE fecha >= :thresh
             GROUP BY fecha
             ORDER BY fecha ASC
         ");
+        $this->db->bind(':thresh', $threshold);
         return $this->db->resultSet();
     }
 
