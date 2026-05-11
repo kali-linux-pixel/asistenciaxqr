@@ -42,17 +42,29 @@ class Permiso {
         return $this->db->execute();
     }
 
-    public function getLogsByDate($fecha) {
-        $this->db->query("
+    public function getLogsByDate($fecha, $grado_id = '') {
+        $sql = "
             SELECT p.*, a.nombres, a.apellidos, gs.grado, gs.seccion, u.nombre as profesor
             FROM permisos p
             JOIN alumnos a ON p.alumno_id = a.id
             JOIN grado_secciones gs ON a.grado_seccion_id = gs.id
             JOIN usuarios u ON p.profesor_id = u.id
             WHERE p.fecha = :fecha
-            ORDER BY p.hora_salida DESC
-        ");
+        ";
+        
+        if (!empty($grado_id)) {
+            $sql .= " AND gs.id = :gsid";
+        }
+        
+        $sql .= " ORDER BY p.hora_salida DESC";
+
+        $this->db->query($sql);
         $this->db->bind(':fecha', $fecha);
+        
+        if (!empty($grado_id)) {
+            $this->db->bind(':gsid', $grado_id);
+        }
+
         return $this->db->resultSet();
     }
 }

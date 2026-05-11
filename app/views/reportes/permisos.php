@@ -3,16 +3,24 @@
 <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem; margin-bottom: 2rem;">
     <!-- Filter Control Box -->
     <div class="glass-card" style="padding: 1.5rem; display:flex; align-items:center;">
-        <form method="GET" action="<?php echo URLROOT; ?>/reportes/permisos" style="width:100%; display:flex; gap:12px; align-items:center;">
-            <div style="flex:1;">
-                <label style="margin-bottom: 3px; font-size:0.8rem;">Filtrar Historial de Permisos:</label>
-                <div style="position:relative;">
-                    <i class="fa-regular fa-calendar" style="position:absolute; left:12px; top:50%; transform:translateY(-50%); color:var(--gray);"></i>
-                    <input type="date" name="fecha" class="form-control" value="<?php echo $data['fecha']; ?>" style="background:rgba(0,0,0,0.2); padding-left:35px; border-radius:8px;">
-                </div>
+        <form method="GET" action="<?php echo URLROOT; ?>/reportes/permisos" style="width:100%; display:flex; gap:12px; align-items:flex-end; flex-wrap:wrap;">
+            <div style="flex:1; min-width:140px;">
+                <label style="margin-bottom: 3px; font-size:0.8rem;">Fecha:</label>
+                <input type="date" name="fecha" class="form-control" value="<?php echo $data['fecha']; ?>" style="background:rgba(0,0,0,0.2); border-radius:8px; padding:10px;">
             </div>
-            <button type="submit" class="btn btn-primary" style="height:45px; margin-top:18px; border-radius:8px; background:var(--secondary);">
-                <i class="fa-solid fa-sync-alt"></i>
+            <div style="flex:1; min-width:180px;">
+                <label style="margin-bottom: 3px; font-size:0.8rem;">Grado/Sección:</label>
+                <select name="grado_seccion" class="form-control" style="background:rgba(0,0,0,0.2); border-radius:8px; padding:10px; color:#fff;">
+                    <option value="">-- Todos los Grados --</option>
+                    <?php foreach($data['grados'] as $g): ?>
+                        <option value="<?php echo $g['id']; ?>" <?php echo ($data['grado_seccion'] == $g['id']) ? 'selected' : ''; ?>>
+                            <?php echo $g['grado'] . ' ' . $g['seccion']; ?>
+                        </option>
+                    <?php endforeach; ?>
+                </select>
+            </div>
+            <button type="submit" class="btn btn-primary" style="height:45px; border-radius:8px; background:var(--secondary);">
+                <i class="fa-solid fa-sync-alt"></i> Filtrar
             </button>
         </form>
     </div>
@@ -21,9 +29,9 @@
     <div class="glass-card" style="padding: 1.5rem; display:flex; align-items:center; gap: 12px;">
         <div style="flex:1; position:relative;">
             <i class="fa-solid fa-search" style="position:absolute; left:12px; top:50%; transform:translateY(-50%); color:var(--gray);"></i>
-            <input type="text" id="permisoSearch" placeholder="Filtrar en vivo por alumno o motivo..." style="width:100%; padding:12px 12px 12px 35px; border-radius:8px; background:rgba(255,255,255,0.02); border:1px solid var(--glass-border); color:#fff; outline:none;">
+            <input type="text" id="permisoSearch" placeholder="Búsqueda rápida..." style="width:100%; padding:12px 12px 12px 35px; border-radius:8px; background:rgba(255,255,255,0.02); border:1px solid var(--glass-border); color:#fff; outline:none;">
         </div>
-        <a href="<?php echo URLROOT; ?>/reportes/exportar?tipo=permiso&fecha=<?php echo $data['fecha']; ?>" class="btn btn-primary" style="background: linear-gradient(135deg, #10b981, #059669); height:45px; border-radius:8px; font-weight:700;">
+        <a href="<?php echo URLROOT; ?>/reportes/exportar?tipo=permiso&fecha=<?php echo $data['fecha']; ?>&grado_seccion=<?php echo $data['grado_seccion']; ?>" class="btn btn-primary" style="background: linear-gradient(135deg, #10b981, #059669); height:45px; border-radius:8px; font-weight:700;">
             <i class="fa-solid fa-file-excel"></i> Exportar
         </a>
     </div>

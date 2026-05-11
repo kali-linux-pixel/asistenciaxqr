@@ -60,16 +60,28 @@ class Asistencia {
         return $this->db->execute();
     }
 
-    public function getLogsByDate($fecha) {
-        $this->db->query("
+    public function getLogsByDate($fecha, $grado_id = '') {
+        $sql = "
             SELECT ast.*, a.nombres, a.apellidos, a.dni, gs.grado, gs.seccion
             FROM asistencias ast
             JOIN alumnos a ON ast.alumno_id = a.id
             JOIN grado_secciones gs ON a.grado_seccion_id = gs.id
             WHERE ast.fecha = :fecha
-            ORDER BY ast.hora_entrada DESC
-        ");
+        ";
+        
+        if (!empty($grado_id)) {
+            $sql .= " AND gs.id = :gsid";
+        }
+        
+        $sql .= " ORDER BY ast.hora_entrada DESC";
+        
+        $this->db->query($sql);
         $this->db->bind(':fecha', $fecha);
+        
+        if (!empty($grado_id)) {
+            $this->db->bind(':gsid', $grado_id);
+        }
+        
         return $this->db->resultSet();
     }
 }

@@ -21,11 +21,14 @@
             <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
                 <div>
                     <label>Motivo:</label>
-                    <select id="permiso_motivo" class="form-control" style="background:#0f172a;">
-                        <option value="Baño">Baño</option>
-                        <option value="Salud">Salud</option>
-                        <option value="Dirección">Dirección</option>
-                        <option value="Otro">Otro</option>
+                    <select id="permiso_motivo" class="form-control" style="background:#0f172a; color:#fff; border-color:var(--glass-border);">
+                        <option value="SS.HH. (Baño)">🚾 SS.HH. (Baño)</option>
+                        <option value="Enfermería / Tópico">🏥 Enfermería / Tópico</option>
+                        <option value="Llamado Dirección">👔 Llamado Dirección</option>
+                        <option value="Coordinación">📚 Coordinación</option>
+                        <option value="Indisciplina / Retiro">⚠️ Indisciplina / Retiro</option>
+                        <option value="Trámite Académico">📄 Trámite Académico</option>
+                        <option value="Otros / Especial">🔰 Otros / Especial</option>
                     </select>
                 </div>
                 <div>
