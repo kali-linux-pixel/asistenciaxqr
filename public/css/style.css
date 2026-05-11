@@ -1,21 +1,22 @@
-/* Reuse original optimized stylesheet */
+/* Paleta: Rojo, Azul, Amarillo, Blanco */
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
 
 :root {
-    --primary: #6366f1;
-    --primary-hover: #4f46e5;
-    --secondary: #a855f7;
-    --dark: #0f172a;
-    --darker: #020617;
-    --light: #f8fafc;
-    --gray: #64748b;
-    --glass: rgba(255, 255, 255, 0.03);
-    --glass-border: rgba(255, 255, 255, 0.08);
-    --glass-heavy: rgba(255, 255, 255, 0.07);
+    --primary: #dc2626;         /* Rojo */
+    --primary-hover: #b91c1c;
+    --secondary: #1d4ed8;       /* Azul */
+    --accent: #eab308;          /* Amarillo */
+    --dark: #0f0f0f;
+    --darker: #050505;
+    --light: #ffffff;           /* Blanco */
+    --gray: #94a3b8;
+    --glass: rgba(255, 255, 255, 0.04);
+    --glass-border: rgba(255, 255, 255, 0.1);
+    --glass-heavy: rgba(255, 255, 255, 0.08);
     --success: #10b981;
-    --warning: #f59e0b;
-    --danger: #ef4444;
-    --card-shadow: 0 10px 30px -5px rgba(0, 0, 0, 0.3);
+    --warning: #eab308;
+    --danger: #dc2626;
+    --card-shadow: 0 10px 30px -5px rgba(0, 0, 0, 0.5);
 }
 
 * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -24,9 +25,9 @@ body {
     font-family: 'Inter', sans-serif;
     background-color: var(--darker);
     background-image: 
-        radial-gradient(at 0% 0%, hsla(253,16%,7%,1) 0, transparent 50%), 
-        radial-gradient(at 50% 0%, hsla(225,39%,30%,0.2) 0, transparent 50%), 
-        radial-gradient(at 100% 0%, hsla(339,49%,30%,0.2) 0, transparent 50%);
+        radial-gradient(at 0% 0%,   rgba(220, 38,  38,  0.15) 0, transparent 50%), 
+        radial-gradient(at 50% 0%,  rgba(29,  78,  216, 0.12) 0, transparent 50%), 
+        radial-gradient(at 100% 0%, rgba(234, 179, 8,   0.10) 0, transparent 50%);
     color: var(--light);
     min-height: 100vh;
 }
@@ -51,7 +52,7 @@ a { text-decoration: none; color: inherit; transition: all 0.3s ease; }
 .logo {
     font-size: 1.5rem;
     font-weight: 700;
-    background: linear-gradient(to right, #818cf8, #c084fc);
+    background: linear-gradient(to right, #dc2626, #1d4ed8);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     display: flex;
@@ -156,7 +157,7 @@ a { text-decoration: none; color: inherit; transition: all 0.3s ease; }
 }
 
 .btn-primary {
-    background: linear-gradient(135deg, var(--primary), var(--secondary));
+    background: linear-gradient(135deg, #dc2626, #1d4ed8);
     color: white;
 }
 

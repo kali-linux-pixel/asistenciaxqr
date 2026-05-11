@@ -11,7 +11,7 @@
         #top-progress-bar {
             position: fixed;
             top: 0; left: 0; height: 3px;
-            background: linear-gradient(to right, #6366f1, #a855f7, #ec4899);
+            background: linear-gradient(to right, #dc2626, #1d4ed8, #eab308);
             z-index: 9999; width: 0%;
             transition: width 0.4s ease;
             box-shadow: 0 0 10px rgba(99,102,241,0.5);
@@ -23,8 +23,8 @@
         
         /* Active Nav Tint */
         .nav-link.active {
-            background: linear-gradient(90deg, rgba(99,102,241,0.15) 0%, transparent 100%);
-            border-left: 3px solid var(--primary);
+            background: linear-gradient(90deg, rgba(220,38,38,0.15) 0%, transparent 100%);
+            border-left: 3px solid #dc2626;
             color: white !important;
         }
     </style>
