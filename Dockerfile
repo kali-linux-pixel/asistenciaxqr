@@ -1,8 +1,8 @@
 FROM php:8.2-apache
 
-# Install PDO PostgreSQL driver
+# Install ALL database drivers for maximum compatibility
 RUN apt-get update && apt-get install -y libpq-dev \
-    && docker-php-ext-install pdo pdo_pgsql
+    && docker-php-ext-install pdo_mysql pdo_pgsql
 
 # Enable Apache Rewrite module
 RUN a2enmod rewrite

@@ -22,8 +22,8 @@ class Database {
         $user = DB_USER;
         $pass = DB_PASS;
 
-        // Auto-Detect Driver: If deploying to Render (contains postgres url) use pgsql, else local mysql
-        if (strpos($host, 'postgres') !== false || strpos($host, '.com') !== false) {
+        // Auto-Detect Driver: If deploying to Render (contains postgres, render or dpg-) use pgsql, else local mysql
+        if (strpos($host, 'postgres') !== false || strpos($host, '.com') !== false || strpos($host, 'dpg-') !== false) {
             $dsn = 'pgsql:host=' . $host . ';port=5432;dbname=' . $dbname;
         } else {
             $dsn = 'mysql:host=' . $host . ';dbname=' . $dbname;
