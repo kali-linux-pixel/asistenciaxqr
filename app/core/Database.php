@@ -17,20 +17,91 @@ class Database {
     private $error;
 
     public function __construct() {
-        // Set DSN
-        $dsn = 'mysql:host=' . $this->host . ';dbname=' . $this->dbname . ';charset=utf8mb4';
+        $host = DB_HOST;
+        $dbname = DB_NAME;
+        $user = DB_USER;
+        $pass = DB_PASS;
+
+        // Auto-Detect Driver: If deploying to Render (contains postgres url) use pgsql, else local mysql
+        if (strpos($host, 'postgres') !== false || strpos($host, '.com') !== false) {
+            $dsn = 'pgsql:host=' . $host . ';port=5432;dbname=' . $dbname;
+        } else {
+            $dsn = 'mysql:host=' . $host . ';dbname=' . $dbname;
+        }
+
         $options = array(
-            PDO::ATTR_PERSISTENT => true,
-            PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
-            PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC
+            PDO::ATTR_PERSISTENT => false,
+            PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION
         );
 
-        // Create PDO instance
         try {
-            $this->dbh = new PDO($dsn, $this->user, $this->pass, $options);
-        } catch (PDOException $e) {
+            $this->dbh = new PDO($dsn, $user, $pass, $options);
+            
+            // Check if Postgres needs schema initialization
+            if (strpos($dsn, 'pgsql') !== false) {
+                $this->initPostgresSchema();
+            }
+        } catch(PDOException $e) {
             $this->error = $e->getMessage();
-            echo $this->error;
+            echo "Conexion Fallida: " . $this->error;
+            die();
+        }
+    }
+
+    // Auto-Installer for PostgreSQL on Render
+    private function initPostgresSchema() {
+        $this->query("SELECT 1 FROM information_schema.tables WHERE table_name = 'usuarios'");
+        try {
+            $exists = $this->single();
+        } catch (Exception $e) { $exists = false; }
+
+        if (!$exists) {
+            // Create tables using Postgres Syntax
+            $sql = "
+            CREATE TABLE IF NOT EXISTS usuarios (
+                id SERIAL PRIMARY KEY,
+                nombre VARCHAR(100),
+                usuario VARCHAR(50) UNIQUE,
+                password VARCHAR(255)
+            );
+            CREATE TABLE IF NOT EXISTS grado_secciones (
+                id SERIAL PRIMARY KEY,
+                grado VARCHAR(50),
+                seccion VARCHAR(10)
+            );
+            CREATE TABLE IF NOT EXISTS alumnos (
+                id SERIAL PRIMARY KEY,
+                grado_seccion_id INTEGER REFERENCES grado_secciones(id),
+                nombres VARCHAR(100),
+                apellidos VARCHAR(100),
+                dni VARCHAR(20),
+                qr_token VARCHAR(100) UNIQUE,
+                estado INTEGER DEFAULT 1
+            );
+            CREATE TABLE IF NOT EXISTS asistencias (
+                id SERIAL PRIMARY KEY,
+                alumno_id INTEGER REFERENCES alumnos(id),
+                fecha DATE DEFAULT CURRENT_DATE,
+                hora_entrada TIME DEFAULT CURRENT_TIME,
+                hora_salida TIME NULL
+            );
+            CREATE TABLE IF NOT EXISTS permisos (
+                id SERIAL PRIMARY KEY,
+                alumno_id INTEGER REFERENCES alumnos(id),
+                profesor_id INTEGER REFERENCES usuarios(id),
+                motivo VARCHAR(50),
+                fecha DATE DEFAULT CURRENT_DATE,
+                hora_salida TIME DEFAULT CURRENT_TIME,
+                hora_estimada_retorno TIME NULL,
+                hora_retorno TIME NULL,
+                estado VARCHAR(20) DEFAULT 'Pendiente'
+            );
+            
+            -- Seed Initial Data
+            INSERT INTO usuarios (nombre, usuario, password) VALUES ('Admin Sistema', 'admin', '" . password_hash('admin123', PASSWORD_DEFAULT) . "') ON CONFLICT DO NOTHING;
+            INSERT INTO grado_secciones (grado, seccion) VALUES ('1er Año', 'A'), ('1er Año', 'B'), ('2do Año', 'A'), ('2do Año', 'B') ON CONFLICT DO NOTHING;
+            ";
+            $this->dbh->exec($sql);
         }
     }
 
