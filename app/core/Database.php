@@ -96,12 +96,16 @@ class Database {
                 hora_retorno TIME NULL,
                 estado VARCHAR(20) DEFAULT 'Pendiente'
             );
-            
-            -- Seed Initial Data
-            INSERT INTO usuarios (nombre, usuario, password) VALUES ('Admin Sistema', 'admin', '" . password_hash('admin123', PASSWORD_DEFAULT) . "') ON CONFLICT DO NOTHING;
-            INSERT INTO grado_secciones (grado, seccion) VALUES ('1er Año', 'A'), ('1er Año', 'B'), ('2do Año', 'A'), ('2do Año', 'B') ON CONFLICT DO NOTHING;
-            ";
             $this->dbh->exec($sql);
+
+            // Seeding in standard format after tables created
+            $this->query("SELECT COUNT(*) as total FROM usuarios");
+            $c = $this->single();
+            if ($c['total'] == 0) {
+                $hash = password_hash('admin123', PASSWORD_DEFAULT);
+                $this->dbh->exec("INSERT INTO usuarios (nombre, usuario, password) VALUES ('Admin Sistema', 'admin', '$hash')");
+                $this->dbh->exec("INSERT INTO grado_secciones (grado, seccion) VALUES ('1er Año', 'A'), ('1er Año', 'B'), ('2do Año', 'A'), ('2do Año', 'B')");
+            }
         }
     }
 
