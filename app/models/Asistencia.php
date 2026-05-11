@@ -1,0 +1,73 @@
+<?php
+class Asistencia {
+    private $db;
+
+    public function __construct() {
+        $this->db = new Database;
+    }
+
+    public function getCountToday() {
+        $this->db->query("SELECT COUNT(*) as total FROM asistencias WHERE fecha = CURRENT_DATE");
+        $row = $this->db->single();
+        return $row['total'];
+    }
+
+    public function getWeeklyStats() {
+        $this->db->query("
+            SELECT fecha, COUNT(*) as total 
+            FROM asistencias 
+            WHERE fecha >= DATE_SUB(CURRENT_DATE, INTERVAL 6 DAY)
+            GROUP BY fecha
+            ORDER BY fecha ASC
+        ");
+        return $this->db->resultSet();
+    }
+
+    public function getRecientes() {
+        $this->db->query("
+            SELECT a.nombres, a.apellidos, 'Asistencia' as tipo, ast.hora_entrada as hora, ast.fecha
+            FROM asistencias ast
+            JOIN alumnos a ON ast.alumno_id = a.id
+            WHERE ast.fecha = CURRENT_DATE
+            UNION ALL
+            SELECT a.nombres, a.apellidos, CONCAT('Permiso: ', p.motivo) as tipo, p.hora_salida as hora, p.fecha
+            FROM permisos p
+            JOIN alumnos a ON p.alumno_id = a.id
+            WHERE p.fecha = CURRENT_DATE
+            ORDER BY hora DESC
+            LIMIT 5
+        ");
+        return $this->db->resultSet();
+    }
+
+    public function checkTodayAttendance($alumno_id) {
+        $this->db->query("SELECT * FROM asistencias WHERE alumno_id = :aid AND fecha = CURRENT_DATE");
+        $this->db->bind(':aid', $alumno_id);
+        return $this->db->single();
+    }
+
+    public function registrarEntrada($alumno_id) {
+        $this->db->query("INSERT INTO asistencias (alumno_id) VALUES (:aid)");
+        $this->db->bind(':aid', $alumno_id);
+        return $this->db->execute();
+    }
+
+    public function registrarSalida($registro_id) {
+        $this->db->query("UPDATE asistencias SET hora_salida = CURRENT_TIME WHERE id = :rid");
+        $this->db->bind(':rid', $registro_id);
+        return $this->db->execute();
+    }
+
+    public function getLogsByDate($fecha) {
+        $this->db->query("
+            SELECT ast.*, a.nombres, a.apellidos, a.dni, gs.grado, gs.seccion
+            FROM asistencias ast
+            JOIN alumnos a ON ast.alumno_id = a.id
+            JOIN grado_secciones gs ON a.grado_seccion_id = gs.id
+            WHERE ast.fecha = :fecha
+            ORDER BY ast.hora_entrada DESC
+        ");
+        $this->db->bind(':fecha', $fecha);
+        return $this->db->resultSet();
+    }
+}
