@@ -96,6 +96,7 @@ class Database {
                 hora_retorno TIME NULL,
                 estado VARCHAR(20) DEFAULT 'Pendiente'
             );
+            ";
             $this->dbh->exec($sql);
 
             // Seeding in standard format after tables created
