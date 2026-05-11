@@ -51,7 +51,7 @@ class Usuarios extends Controller {
     public function createUserSession($user) {
         $_SESSION['user_id'] = $user['id'];
         $_SESSION['user_name'] = $user['nombre'];
-        $_SESSION['user_rol'] = $user['rol'];
+        $_SESSION['user_rol'] = $user['rol'] ?? 'admin';
         redirect('pages/index');
     }
 
