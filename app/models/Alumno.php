@@ -30,11 +30,45 @@ class Alumno {
     }
 
     public function getGradeIdByNames($grado, $seccion) {
+        $gradoLimpio = trim($grado);
+        $seccLimpia  = trim($seccion);
+
+        // 1. Intentar coincidencia exacta primero (Rápido)
         $this->db->query("SELECT id FROM grado_secciones WHERE LOWER(grado) = LOWER(:grado) AND LOWER(seccion) = LOWER(:seccion) LIMIT 1");
-        $this->db->bind(':grado', trim($grado));
-        $this->db->bind(':seccion', trim($seccion));
+        $this->db->bind(':grado', $gradoLimpio);
+        $this->db->bind(':seccion', $seccLimpia);
         $row = $this->db->single();
-        return $row ? $row['id'] : null;
+        if ($row) return $row['id'];
+
+        // 2. Búsqueda Inteligente y Tolerante (Fuzzy Matching)
+        // Si el Excel dice "4to", "4", "4°" y en BD dice "4to Grado", los emparejamos por el número central.
+        $this->db->query("SELECT id, grado, seccion FROM grado_secciones");
+        $gradosDB = $this->db->resultSet();
+
+        // Extraer el primer número que aparezca en la entrada (ej: "4to Grado" -> 4, "3er Año" -> 3)
+        preg_match('/\d+/', $gradoLimpio, $matchEntrada);
+        $numEntrada = $matchEntrada[0] ?? null;
+        $secEntrada = strtoupper($seccLimpia);
+
+        // Limpieza extra de comillas por si acaso en sección
+        $secEntrada = str_replace(['"', "'", '“', '”', '«', '»'], '', $secEntrada);
+
+        if ($numEntrada !== null) {
+            foreach ($gradosDB as $g) {
+                preg_match('/\d+/', $g['grado'], $matchBD);
+                $numBD = $matchBD[0] ?? null;
+                $secBD = strtoupper(trim($g['seccion']));
+                
+                // Quitar comillas también de la sección de BD para comparar limpio
+                $secBD = str_replace(['"', "'", '“', '”', '«', '»'], '', $secBD);
+
+                if ($numBD === $numEntrada && $secBD === $secEntrada) {
+                    return $g['id']; // ¡Encontrado por inteligencia de patrones!
+                }
+            }
+        }
+
+        return null;
     }
 
     public function registrarAlumno($data) {

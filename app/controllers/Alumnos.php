@@ -164,7 +164,7 @@ class Alumnos extends Controller {
                 if ($successCount == 0 && $updateCount == 0 && $errorCount == 0 && $skipCount == 0 && $otherClassCount == 0) {
                     flash('alumno_message', '❌ No se detectaron datos válidos en el archivo. Revisa que las columnas coincidan con la guía.', 'alert-error');
                 } else {
-                    $msg = "📊 **Resumen del Proceso:**<br>";
+                    $msg = "📊 <b>Resumen del Proceso:</b><br>";
                     $msg .= "✅ <b>$successCount</b> Alumnos Nuevos registrados.<br>";
                     if ($updateCount > 0) {
                         $msg .= "🔄 <b>$updateCount</b> Alumnos Actualizados (Pasaron de Grado/Sección).<br>";
@@ -176,7 +176,7 @@ class Alumnos extends Controller {
                         $msg .= "⚠️ <b>$otherClassCount</b> Omitidos por ser de OTRAS AULAS (Solo tienes permiso para la tuya).<br>";
                     }
                     if ($errorCount > 0) {
-                        $msg .= "❌ <b>$errorCount</b> Fallidos (Revisa nombres de grados).";
+                        $msg .= "❌ <b>$errorCount</b> Fallidos (Firma de Grado no coincide con la base de datos).";
                     }
                     flash('alumno_message', $msg);
                 }
