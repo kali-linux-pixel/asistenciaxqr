@@ -67,7 +67,7 @@
                         <td>
                             <span class="badge badge-info">
                                 <i class="fa-solid fa-door-open"></i>
-                                <?php echo $s['grado'].' &ldquo;'.$s['seccion'].'&rdquo;'; ?>
+                                <?php echo formatAula($s['grado'], $s['seccion']); ?>
                             </span>
                         </td>
                         <td>

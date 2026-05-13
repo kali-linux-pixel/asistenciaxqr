@@ -35,7 +35,7 @@
                     <option value="" disabled <?php echo empty($data['selectedGrado']) ? 'selected' : ''; ?>>Seleccionar...</option>
                     <?php foreach($data['grades'] as $g): ?>
                         <option value="<?php echo $g['id']; ?>" <?php echo ($data['selectedGrado'] == $g['id']) ? 'selected' : ''; ?>>
-                            <?php echo $g['grado'].' "'.$g['seccion'].'"'; ?>
+                            <?php echo formatAula($g['grado'], $g['seccion']); ?>
                         </option>
                     <?php endforeach; ?>
                 </select>

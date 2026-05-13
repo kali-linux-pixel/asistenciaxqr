@@ -42,6 +42,18 @@ class Permiso {
         return $this->db->execute();
     }
 
+    public function actualizarEstadoManual($permiso_id, $estado) {
+        if ($estado === 'No Regresó') {
+            $this->db->query("UPDATE permisos SET estado = 'No Regresó', hora_retorno = NULL WHERE id = :pid");
+        } else {
+            // Si se marca como retornado u otro, ponerle la hora actual como cierre
+            $this->db->query("UPDATE permisos SET estado = :estado, hora_retorno = CURRENT_TIME WHERE id = :pid");
+            $this->db->bind(':estado', $estado);
+        }
+        $this->db->bind(':pid', $permiso_id);
+        return $this->db->execute();
+    }
+
     public function getLogsByDate($fecha, $grado_id = '') {
         $sql = "
             SELECT p.*, a.nombres, a.apellidos, gs.grado, gs.seccion, u.nombre as profesor

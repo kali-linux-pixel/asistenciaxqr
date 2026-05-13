@@ -12,10 +12,12 @@
             <div style="flex:1; min-width:180px;">
                 <label style="font-size:0.75rem;">Aula / Grado</label>
                 <select name="grado_seccion" class="form-control" style="cursor:pointer;">
-                    <option value="">Todos los Grados</option>
+                    <?php if (isDirector()): ?>
+                        <option value="">Todos los Grados</option>
+                    <?php endif; ?>
                     <?php foreach($data['grados'] as $g): ?>
                         <option value="<?php echo $g['id']; ?>" <?php echo ($data['grado_seccion']==$g['id'])?'selected':''; ?>>
-                            <?php echo $g['grado'].' — '.$g['seccion']; ?>
+                            <?php echo formatAula($g['grado'], $g['seccion']); ?>
                         </option>
                     <?php endforeach; ?>
                 </select>
@@ -74,7 +76,7 @@
                                 <span style="font-weight:600; font-size:0.86rem;"><?php echo htmlspecialchars($r['apellidos'].', '.$r['nombres']); ?></span>
                             </div>
                         </td>
-                        <td><span class="badge badge-info"><?php echo $r['grado'].' '.$r['seccion']; ?></span></td>
+                        <td><span class="badge badge-info"><?php echo formatAula($r['grado'], $r['seccion']); ?></span></td>
                         <td>
                             <span style="font-weight:700; color:#27ae60;">
                                 <i class="fa-solid fa-right-to-bracket" style="font-size:0.75rem; margin-right:4px;"></i>

@@ -15,9 +15,21 @@ class Reportes extends Controller {
         $fecha = $_GET['fecha'] ?? date('Y-m-d');
         $gsid = $_GET['grado_seccion'] ?? '';
         
+        // 🔒 RESTRICCIÓN DE ROL: Si no es Director, forzar su propio Grado
+        if (!isDirector()) {
+            $gsid = $_SESSION['user_grado_seccion_id'] ?? 0;
+        }
+
         $logs = $this->asistenciaModel->getLogsByDate($fecha, $gsid);
         $grados = $this->alumnoModel->getGrades();
         
+        // Filtrar los grados del selector para que al profesor solo le salga el suyo
+        if (!isDirector()) {
+            $grados = array_filter($grados, function($g) use ($gsid) {
+                return $g['id'] == $gsid;
+            });
+        }
+
         $data = [
             'title' => 'Reporte de Asistencias',
             'fecha' => $fecha,
@@ -33,9 +45,21 @@ class Reportes extends Controller {
         $fecha = $_GET['fecha'] ?? date('Y-m-d');
         $gsid = $_GET['grado_seccion'] ?? '';
         
+        // 🔒 RESTRICCIÓN DE ROL: Si no es Director, forzar su propio Grado
+        if (!isDirector()) {
+            $gsid = $_SESSION['user_grado_seccion_id'] ?? 0;
+        }
+
         $logs = $this->permisoModel->getLogsByDate($fecha, $gsid);
         $grados = $this->alumnoModel->getGrades();
         
+        // Filtrar los grados del selector para que al profesor solo le salga el suyo
+        if (!isDirector()) {
+            $grados = array_filter($grados, function($g) use ($gsid) {
+                return $g['id'] == $gsid;
+            });
+        }
+
         $data = [
             'title' => 'Reporte de Permisos',
             'fecha' => $fecha,
@@ -47,10 +71,32 @@ class Reportes extends Controller {
         $this->view('reportes/permisos', $data);
     }
 
+    public function resolver_permiso($id, $estado) {
+        $estadoLimpio = urldecode($estado);
+        $validos = ['Retornado', 'No Regresó'];
+        
+        if (!in_array($estadoLimpio, $validos)) {
+            redirect('reportes/permisos');
+        }
+
+        if ($this->permisoModel->actualizarEstadoManual($id, $estadoLimpio)) {
+            $label = ($estadoLimpio === 'No Regresó') ? '⚠️ Alumno reportado como NO REGRESADO.' : '✅ Alumno marcado como Retornado exitosamente.';
+            flash('permiso_message', $label);
+        } else {
+            flash('permiso_message', 'Hubo un problema al actualizar el estado.', 'alert alert-danger');
+        }
+        redirect('reportes/permisos');
+    }
+
     public function exportar() {
         $fecha = $_GET['fecha'] ?? date('Y-m-d');
         $gsid = $_GET['grado_seccion'] ?? '';
         $tipo = $_GET['tipo'] ?? 'asistencia';
+
+        // 🔒 RESTRICCIÓN DE ROL: Evitar exportaciones de otras aulas
+        if (!isDirector()) {
+            $gsid = $_SESSION['user_grado_seccion_id'] ?? 0;
+        }
 
         header('Content-Type: text/csv; charset=utf-8');
         header('Content-Disposition: attachment; filename=reporte_'.$tipo.'_'.$fecha.'.csv');

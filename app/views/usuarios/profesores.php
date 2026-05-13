@@ -91,7 +91,7 @@
                             <?php if($p['grado']): ?>
                                 <span class="badge badge-info">
                                     <i class="fa-solid fa-door-open"></i>
-                                    <?php echo $p['grado'].' — Sec. "'.$p['seccion'].'"'; ?>
+                                    <?php echo formatAula($p['grado'], $p['seccion']); ?>
                                 </span>
                             <?php else: ?>
                                 <span class="badge badge-neutral">Sin asignar</span>

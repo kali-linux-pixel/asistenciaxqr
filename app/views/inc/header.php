@@ -115,6 +115,12 @@
                     Registro de Notas
                 </a>
             </li>
+            <li>
+                <a href="<?php echo URLROOT; ?>/mensajes/index" class="nav-link" style="border-top:1px solid rgba(255,255,255,0.05); margin-top:5px; padding-top:10px;">
+                    <span class="nav-icon"><i class="fa-solid fa-envelope"></i></span>
+                    Buzón de Mensajes
+                </a>
+            </li>
         </ul>
 
         <?php else: ?>
@@ -158,6 +164,12 @@
                 <a href="<?php echo URLROOT; ?>/reportes/permisos" class="nav-link">
                     <span class="nav-icon"><i class="fa-solid fa-ticket"></i></span>
                     Papeletas
+                </a>
+            </li>
+            <li>
+                <a href="<?php echo URLROOT; ?>/mensajes/index" class="nav-link" style="border-top:1px solid rgba(255,255,255,0.05); margin-top:5px; padding-top:10px;">
+                    <span class="nav-icon"><i class="fa-solid fa-envelope-open-text"></i></span>
+                    Consultar Dirección
                 </a>
             </li>
         </ul>

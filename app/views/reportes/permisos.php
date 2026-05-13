@@ -12,10 +12,12 @@
             <div style="flex:1; min-width:180px;">
                 <label style="font-size:0.75rem;">Aula / Grado</label>
                 <select name="grado_seccion" class="form-control" style="cursor:pointer;">
-                    <option value="">Todos los Grados</option>
+                    <?php if (isDirector()): ?>
+                        <option value="">Todos los Grados</option>
+                    <?php endif; ?>
                     <?php foreach($data['grados'] as $g): ?>
                         <option value="<?php echo $g['id']; ?>" <?php echo ($data['grado_seccion']==$g['id'])?'selected':''; ?>>
-                            <?php echo $g['grado'].' — '.$g['seccion']; ?>
+                            <?php echo formatAula($g['grado'], $g['seccion']); ?>
                         </option>
                     <?php endforeach; ?>
                 </select>
@@ -46,6 +48,8 @@
         </div>
         <span class="badge badge-neutral"><?php echo count($data['registros']); ?> papeletas</span>
     </div>
+    <?php flash('permiso_message'); ?>
+
     <div class="table-wrap">
         <table id="permisosTable">
             <thead>
@@ -56,11 +60,12 @@
                     <th>Salida</th>
                     <th>Retorno</th>
                     <th>Estado</th>
+                    <th style="text-align:right;">Acciones</th>
                 </tr>
             </thead>
             <tbody>
                 <?php if(empty($data['registros'])): ?>
-                    <tr><td colspan="6" style="text-align:center; padding:3rem; color:#9ca3af;">
+                    <tr><td colspan="7" style="text-align:center; padding:3rem; color:#9ca3af;">
                         <i class="fa-solid fa-ticket" style="font-size:2rem; display:block; margin-bottom:10px; opacity:0.3;"></i>
                         No se registraron papeletas de permiso esta fecha.
                     </td></tr>
@@ -69,7 +74,7 @@
                         $hora = date('H:i:s');
                         $atrasado = ($r['estado']==='Pendiente' && isset($r['hora_estimada_retorno']) && $hora > $r['hora_estimada_retorno']);
                     ?>
-                    <tr>
+                    <tr <?php echo ($r['estado'] === 'No Regresó') ? 'style="background:rgba(220,38,38,0.04);"' : ''; ?>>
                         <td>
                             <div style="display:flex; align-items:center; gap:9px;">
                                 <div class="avatar" style="width:30px;height:30px;background:#fdecea;color:#c0392b;">
@@ -78,7 +83,7 @@
                                 <div>
                                     <div style="font-weight:700; font-size:0.86rem;"><?php echo htmlspecialchars($r['apellidos'].', '.$r['nombres']); ?></div>
                                     <?php if(isset($r['grado'])): ?>
-                                    <div style="font-size:0.72rem; color:#9ca3af;"><?php echo $r['grado'].' '.$r['seccion']; ?></div>
+                                    <div style="font-size:0.72rem; color:#9ca3af;"><?php echo formatAula($r['grado'], $r['seccion']); ?></div>
                                     <?php endif; ?>
                                 </div>
                             </div>
@@ -104,6 +109,10 @@
                                     <i class="fa-solid fa-check" style="margin-right:3px;"></i>
                                     <?php echo date('h:i A', strtotime($r['hora_retorno'])); ?>
                                 </span>
+                            <?php elseif($r['estado'] === 'No Regresó'): ?>
+                                <span style="color:#ef4444; font-weight:800; font-size:0.8rem;">
+                                    <i class="fa-solid fa-user-xmark"></i> Fuga / Abandono
+                                </span>
                             <?php else: ?>
                                 <span style="color:#9ca3af; font-style:italic; font-size:0.8rem;">Pendiente</span>
                             <?php endif; ?>
@@ -111,12 +120,40 @@
                         <td>
                             <?php if($r['estado']==='Retornado'): ?>
                                 <span class="badge badge-success"><i class="fa-solid fa-check-circle"></i> Retornó</span>
+                            <?php elseif($r['estado']==='No Regresó'): ?>
+                                <span class="badge badge-danger" style="background:#ef4444; color:#fff;">
+                                    <i class="fa-solid fa-triangle-exclamation"></i> No Regresó
+                                </span>
                             <?php elseif($atrasado): ?>
                                 <span class="badge badge-danger" style="animation:pulse 1.5s infinite;">
-                                    <i class="fa-solid fa-triangle-exclamation"></i> Tardanza
+                                    <i class="fa-solid fa-clock"></i> Demorado
                                 </span>
                             <?php else: ?>
                                 <span class="badge badge-warning"><i class="fa-solid fa-hourglass-half"></i> Fuera</span>
+                            <?php endif; ?>
+                        </td>
+                        <td style="text-align:right;">
+                            <?php if($r['estado'] === 'Pendiente'): ?>
+                                <div style="display:inline-flex; gap:6px;">
+                                    <a href="<?php echo URLROOT; ?>/reportes/resolver_permiso/<?php echo $r['id']; ?>/Retornado" 
+                                       class="btn btn-success btn-sm" 
+                                       style="font-size:0.75rem; padding:6px 10px; height:auto;"
+                                       onclick="return confirm('¿Confirmar que el alumno ya regresó al aula?');"
+                                       title="Marcar Retorno Manual">
+                                        <i class="fa-solid fa-check"></i> Retornó
+                                    </a>
+                                    <a href="<?php echo URLROOT; ?>/reportes/resolver_permiso/<?php echo $r['id']; ?>/No%20Regres%C3%B3" 
+                                       class="btn btn-danger btn-sm" 
+                                       style="font-size:0.75rem; padding:6px 10px; height:auto; background:#DC2626; border-color:#DC2626;"
+                                       onclick="return confirm('🚨 ATENCIÓN: ¿Reportar que el alumno NUNCA REGRESÓ a clases?');"
+                                       title="Reportar que NO REGRESÓ">
+                                        <i class="fa-solid fa-triangle-exclamation"></i> No Regresó
+                                    </a>
+                                </div>
+                            <?php else: ?>
+                                <span style="font-size:0.72rem; color:#9ca3af; font-weight:600;">
+                                    <i class="fa-solid fa-lock"></i> Cerrado
+                                </span>
                             <?php endif; ?>
                         </td>
                     </tr>

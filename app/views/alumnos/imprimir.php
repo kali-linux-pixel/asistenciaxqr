@@ -19,7 +19,7 @@ $qrImageUrl = "https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=" .
         <h2 style="margin:0 0 15px; font-size:1rem;">CARNÉ ESTUDIANTIL</h2>
         <img src="<?php echo $qrImageUrl; ?>" width="200">
         <div class="name"><?php echo htmlspecialchars($alumno['apellidos'] . ' ' . $alumno['nombres']); ?></div>
-        <div style="background:#f3f4f6; display:inline-block; padding:5px 10px; border-radius:5px;"><?php echo $alumno['grado'] . ' ' . $alumno['seccion']; ?></div>
+        <div style="background:#f3f4f6; display:inline-block; padding:5px 10px; border-radius:5px;"><?php echo formatAula($alumno['grado'], $alumno['seccion']); ?></div>
     </div>
 </body>
 </html>

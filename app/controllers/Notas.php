@@ -30,7 +30,7 @@ class Notas extends Controller {
                 // Buscar nombre del grado para mostrarlo
                 $gInfo = $this->alumnoModel->getGradeById($selectedGrado);
                 if($gInfo) {
-                    $teacherGradeName = $gInfo['grado'] . ' "' . $gInfo['seccion'] . '"';
+                    $teacherGradeName = formatAula($gInfo['grado'], $gInfo['seccion']);
                 }
             }
         } else {

@@ -44,6 +44,9 @@ class Database {
             } else {
                 $this->dbh->exec("SET time_zone = '-05:00';");
             }
+
+            // --- AUTO-INSTALL MESSAGES MODULE IF NOT EXISTS ---
+            $this->ensureMessagesTable();
         } catch(PDOException $e) {
             $this->error = $e->getMessage();
             echo "Conexion Fallida: " . $this->error;
@@ -163,5 +166,36 @@ class Database {
     // Insert ID
     public function lastInsertId() {
         return $this->dbh->lastInsertId();
+    }
+
+    private function ensureMessagesTable() {
+        try {
+            $driver = $this->dbh->getAttribute(PDO::ATTR_DRIVER_NAME);
+            if ($driver === 'pgsql') {
+                $this->dbh->exec("
+                    CREATE TABLE IF NOT EXISTS mensajes (
+                        id SERIAL PRIMARY KEY,
+                        remitente_id INT NOT NULL,
+                        destinatario_id INT NOT NULL,
+                        contenido TEXT NOT NULL,
+                        fecha_envio TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                        leido INT DEFAULT 0
+                    );
+                ");
+            } else {
+                $this->dbh->exec("
+                    CREATE TABLE IF NOT EXISTS mensajes (
+                        id INT AUTO_INCREMENT PRIMARY KEY,
+                        remitente_id INT NOT NULL,
+                        destinatario_id INT NOT NULL,
+                        contenido TEXT NOT NULL,
+                        fecha_envio TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                        leido INT DEFAULT 0
+                    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+                ");
+            }
+        } catch (Exception $e) {
+            // Ignorar errores de privilegios o existencia silenciosamente
+        }
     }
 }

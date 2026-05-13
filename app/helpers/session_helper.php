@@ -56,3 +56,10 @@ function redirect($page) {
     header('Location: '.URLROOT.'/'.$page);
     exit;
 }
+
+/** Formatea Grado y Sección limpiamente a formato 5to "A" */
+function formatAula($grado, $seccion) {
+    $gradoLimpio = trim(str_replace(['Grado', 'grado', 'Año', 'año'], '', $grado));
+    $seccLimpia = trim(str_replace(['"', "'", '“', '”', '«', '»'], '', $seccion));
+    return $gradoLimpio . ' "' . $seccLimpia . '"';
+}
