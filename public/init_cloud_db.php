@@ -35,20 +35,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['confirm_reset'])) {
     if ($isPostgres) {
         // --- SECUENCIA POSTGRESQL ---
         
-        // 1. Limpiar todo primero para empezar de CERO
-        $dropTables = "
-            DROP TABLE IF EXISTS notas CASCADE;
-            DROP TABLE IF EXISTS cursos CASCADE;
-            DROP TABLE IF EXISTS dashboard_config CASCADE;
-            DROP TABLE IF EXISTS audit_log CASCADE;
-            DROP TABLE IF EXISTS alertas CASCADE;
-            DROP TABLE IF EXISTS permisos CASCADE;
-            DROP TABLE IF EXISTS asistencias CASCADE;
-            DROP TABLE IF EXISTS alumnos CASCADE;
-            DROP TABLE IF EXISTS usuarios CASCADE;
-            DROP TABLE IF EXISTS grado_secciones CASCADE;
-        ";
-        runQuery($db, $dropTables, "Limpieza total de tablas existentes");
+        // 1. Limpiar todo individualmente para evitar errores de comandos múltiples
+        $tablesToDrop = ['notas', 'cursos', 'dashboard_config', 'audit_log', 'alertas', 'permisos', 'asistencias', 'alumnos', 'usuarios', 'grado_secciones'];
+        foreach ($tablesToDrop as $tbl) {
+            runQuery($db, "DROP TABLE IF EXISTS $tbl CASCADE;", "Limpiar tabla vieja: $tbl");
+        }
 
         // 2. Crear Grados
         $sqlGrados = "
