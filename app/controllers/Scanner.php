@@ -24,21 +24,27 @@ class Scanner extends Controller {
         }
 
         header('Content-Type: application/json');
-        $token = $_POST['token'] ?? '';
-        $mode = $_POST['mode'] ?? '';
+        $token  = $_POST['token'] ?? '';
+        $dni    = $_POST['dni'] ?? '';
+        $mode   = $_POST['mode'] ?? '';
         $motivo = $_POST['motivo'] ?? 'Otro';
         $tiempo = intval($_POST['tiempo'] ?? 10); // Added duration capture
         $profesor_id = $_SESSION['user_id'];
 
-        if (empty($token)) {
-            echo json_encode(['status' => 'error', 'message' => 'Token vacío']);
+        if (empty($token) && empty($dni)) {
+            echo json_encode(['status' => 'error', 'message' => 'No se recibió QR ni DNI']);
             exit;
         }
 
-        $alumno = $this->alumnoModel->getAlumnoByToken($token);
+        $alumno = null;
+        if (!empty($token)) {
+            $alumno = $this->alumnoModel->getAlumnoByToken($token);
+        } elseif (!empty($dni)) {
+            $alumno = $this->alumnoModel->getAlumnoByDni($dni);
+        }
 
         if (!$alumno) {
-            echo json_encode(['status' => 'error', 'message' => 'QR no válido o alumno inactivo']);
+            echo json_encode(['status' => 'error', 'message' => 'ALUMNO NO REGISTRADO']);
             exit;
         }
 
@@ -85,15 +91,21 @@ class Scanner extends Controller {
                      exit;
                 }
 
-                // Calculate estimated return time
-                $estimatedTime = date('H:i:s', strtotime("+$tiempo minutes"));
+                // Calcular hora estimada de retorno o Permanente
+                if ($tiempo >= 999) {
+                    $estimatedTime = '23:59:59'; // Fin de día
+                    $msgVence = 'PERMANENTE';
+                } else {
+                    $estimatedTime = date('H:i:s', strtotime("+$tiempo minutes"));
+                    $msgVence = date('h:i A', strtotime($estimatedTime));
+                }
 
                 $this->permisoModel->registrarSalida($alumnoId, $profesor_id, $motivo, $estimatedTime);
                 echo json_encode([
                     'status' => 'success',
-                    'message' => 'SALIDA AUTORIZADA (' . $motivo . ')',
+                    'message' => 'SALIDA AUTORIZADA: ' . $motivo,
                     'alumno' => $alumnoNombre,
-                    'timestamp' => date('h:i A') . ' (Vence: ' . date('h:i A', strtotime($estimatedTime)) . ')'
+                    'timestamp' => date('h:i A') . ' (Vence: ' . $msgVence . ')'
                 ]);
             } 
             elseif ($mode === 'permiso_retorno') {

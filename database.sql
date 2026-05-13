@@ -1,63 +1,63 @@
-CREATE DATABASE IF NOT EXISTS qr_aula_control CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
-USE qr_aula_control;
+-- ============================================================
+-- MIGRACIÓN COMPLETA: Sistema de Roles Director / Profesor
+-- Ejecutar en PostgreSQL (Render) o MySQL (Local)
+-- ============================================================
 
-CREATE TABLE IF NOT EXISTS grado_secciones (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    grado VARCHAR(20) NOT NULL,
-    seccion VARCHAR(10) NOT NULL
-) ENGINE=InnoDB;
+-- Para PostgreSQL (Render):
+-- Agregar columnas si no existen
+DO $$
+BEGIN
+    IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='usuarios' AND column_name='email') THEN
+        ALTER TABLE usuarios ADD COLUMN email VARCHAR(150) UNIQUE;
+    END IF;
+    IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='usuarios' AND column_name='grado_seccion_id') THEN
+        ALTER TABLE usuarios ADD COLUMN grado_seccion_id INT REFERENCES grado_secciones(id) ON DELETE SET NULL;
+    END IF;
+END $$;
 
-CREATE TABLE IF NOT EXISTS alumnos (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    nombres VARCHAR(100) NOT NULL,
-    apellidos VARCHAR(100) NOT NULL,
-    dni VARCHAR(15),
-    grado_seccion_id INT NOT NULL,
-    qr_token VARCHAR(255) NOT NULL UNIQUE,
-    estado TINYINT DEFAULT 1,
-    fecha_registro TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (grado_seccion_id) REFERENCES grado_secciones(id)
-) ENGINE=InnoDB;
+-- Cambiar el tipo del enum rol (PostgreSQL no tiene ALTER ENUM directo)
+-- Primero crear el nuevo tipo
+DO $$
+BEGIN
+    IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'rol_tipo') THEN
+        CREATE TYPE rol_tipo AS ENUM ('director', 'profesor');
+    END IF;
+END $$;
 
-CREATE TABLE IF NOT EXISTS usuarios (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    nombre VARCHAR(100) NOT NULL,
-    usuario VARCHAR(50) NOT NULL UNIQUE,
-    password VARCHAR(255) NOT NULL,
-    rol ENUM('admin', 'profesor', 'auxiliar') NOT NULL,
-    fecha_creacion TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-) ENGINE=InnoDB;
+-- Actualizar la columna rol
+ALTER TABLE usuarios ALTER COLUMN rol TYPE VARCHAR(20);
+UPDATE usuarios SET rol = 'director' WHERE rol IN ('admin', 'administrador');
+UPDATE usuarios SET rol = 'profesor' WHERE rol NOT IN ('director');
 
-CREATE TABLE IF NOT EXISTS asistencias (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    alumno_id INT NOT NULL,
-    fecha DATE DEFAULT (CURRENT_DATE),
-    hora_entrada TIME DEFAULT (CURRENT_TIME),
-    hora_salida TIME NULL,
-    FOREIGN KEY (alumno_id) REFERENCES alumnos(id)
-) ENGINE=InnoDB;
+-- Insertar el Director si no existe
+INSERT INTO usuarios (nombre, usuario, email, password, rol, grado_seccion_id)
+VALUES (
+    'Director General',
+    'director',
+    'director@colegio.edu.pe',
+    '$2y$10$RXp3Hfzk7p.FVu2vlBzqBOj/RUlN/YuoAIXHWB0HZaR.vHZc8NF6',
+    'director',
+    NULL
+)
+ON CONFLICT (usuario) DO UPDATE SET rol = 'director', email = EXCLUDED.email;
 
-CREATE TABLE IF NOT EXISTS permisos (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    alumno_id INT NOT NULL,
-    profesor_id INT NOT NULL,
-    motivo ENUM('Baño', 'Salud', 'Dirección', 'Otro') NOT NULL,
-    fecha DATE DEFAULT (CURRENT_DATE),
-    hora_salida TIME DEFAULT (CURRENT_TIME),
-    hora_retorno TIME NULL,
-    estado ENUM('Pendiente', 'Retornado') DEFAULT 'Pendiente',
-    FOREIGN KEY (alumno_id) REFERENCES alumnos(id),
-    FOREIGN KEY (profesor_id) REFERENCES usuarios(id)
-) ENGINE=InnoDB;
+-- ============================================================
+-- Para MySQL (Laragon local) — ejecutar esto en su lugar:
+-- ============================================================
+/*
+ALTER TABLE usuarios 
+    ADD COLUMN IF NOT EXISTS email VARCHAR(150) UNIQUE AFTER usuario,
+    ADD COLUMN IF NOT EXISTS grado_seccion_id INT NULL AFTER email,
+    MODIFY COLUMN rol ENUM('director','profesor') NOT NULL DEFAULT 'profesor';
 
--- Insert standard groups
-INSERT INTO grado_secciones (grado, seccion) VALUES 
-('1ro', 'A'), ('1ro', 'B'),
-('2do', 'A'), ('2do', 'B'),
-('3ro', 'A'), ('3ro', 'B'),
-('4to', 'A'), ('4to', 'B'),
-('5to', 'A'), ('5to', 'B');
+ALTER TABLE usuarios 
+    ADD FOREIGN KEY IF NOT EXISTS fk_user_grado (grado_seccion_id) REFERENCES grado_secciones(id) ON DELETE SET NULL;
 
--- Insert initial admin user (password is 'admin123')
-INSERT INTO usuarios (nombre, usuario, password, rol) VALUES 
-('Administrador Principal', 'admin', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'admin');
+ALTER TABLE permisos MODIFY COLUMN motivo VARCHAR(100) NOT NULL;
+
+-- Actualizar rol del admin existente a director
+UPDATE usuarios SET rol = 'director', email = 'director@colegio.edu.pe' WHERE usuario = 'admin' OR rol = 'admin';
+
+INSERT IGNORE INTO usuarios (nombre, usuario, email, password, rol) VALUES 
+('Director General', 'director', 'director@colegio.edu.pe', '$2y$10$RXp3Hfzk7p.FVu2vlBzqBOj/RUlN/YuoAIXHWB0HZaR.vHZc8NF6', 'director');
+*/

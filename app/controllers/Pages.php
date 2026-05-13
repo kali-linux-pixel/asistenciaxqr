@@ -5,12 +5,10 @@ class Pages extends Controller {
     protected $permisoModel;
 
     public function __construct() {
-        if (!isLoggedIn()) {
-            redirect('usuarios/login');
-        }
-        $this->alumnoModel = $this->model('Alumno');
+        requireLogin();
+        $this->alumnoModel     = $this->model('Alumno');
         $this->asistenciaModel = $this->model('Asistencia');
-        $this->permisoModel = $this->model('Permiso');
+        $this->permisoModel    = $this->model('Permiso');
     }
 
     public function index() {
@@ -20,15 +18,17 @@ class Pages extends Controller {
         $recientes = $this->asistenciaModel->getRecientes();
         $stats = $this->asistenciaModel->getWeeklyStats();
         $motivoStats = $this->permisoModel->getStatsByMotivo();
+        $gradoStats = $this->asistenciaModel->getAttendanceByGrado();
 
         $data = [
-            'title' => 'Panel de Control',
+            'title' => 'Panel Ejecutivo',
             'totalAlumnos' => $totalAlumnos,
             'totalAsistencias' => $totalAsistencias,
             'permisosActivos' => $permisosActivos,
             'recientes' => $recientes,
             'stats' => $stats,
-            'motivoStats' => $motivoStats
+            'motivoStats' => $motivoStats,
+            'gradoStats' => $gradoStats
         ];
 
         $this->view('pages/index', $data);

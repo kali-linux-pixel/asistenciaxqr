@@ -1,32 +1,51 @@
 <?php require APPROOT . '/views/inc/header.php'; ?>
-
-<div class="login-container">
-    <div class="glass-card login-card">
-        <div class="logo" style="justify-content: center; font-size: 2rem; margin-bottom: 1.5rem;">
-            <i class="fa-solid fa-qrcode"></i> QR Aula
-        </div>
-        <p style="text-align: center; color: var(--gray); margin-bottom: 2rem;">Inicia sesión para acceder</p>
-
-        <?php if(!empty($data['error'])): ?>
-            <div style="background: rgba(239,68,68,0.1); color: #fca5a5; padding: 12px; border-radius: 8px; margin-bottom: 1.5rem; text-align: center; border: 1px solid rgba(239,68,68,0.3);">
-                <?php echo $data['error']; ?>
-            </div>
-        <?php endif; ?>
-
-        <form action="<?php echo URLROOT; ?>/usuarios/login" method="POST">
-            <div class="form-group">
-                <label><i class="fa-solid fa-user"></i> Usuario</label>
-                <input type="text" name="usuario" class="form-control" value="<?php echo $data['usuario']; ?>" required>
-            </div>
-            <div class="form-group">
-                <label><i class="fa-solid fa-lock"></i> Contraseña</label>
-                <input type="password" name="password" class="form-control" required>
-            </div>
-            <button type="submit" class="btn btn-primary" style="width: 100%; padding: 14px; margin-top: 1rem;">
-                Entrar al Sistema
-            </button>
-        </form>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Poppins:wght@700;800;900&display=swap');
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}body{font-family:'Inter',sans-serif;background:#fff;min-height:100vh;display:flex}.login-wrapper{display:grid;grid-template-columns:55% 45%;width:100%;min-height:100vh}:root{--azul:#0B0B93;--amarillo:#FBBF24;--rojo:#DC2626;--blanco:#fff;--sombra:0 10px 40px rgba(0,0,0,.15)}.panel-left{background:linear-gradient(135deg,#050559,var(--azul),#0d0daa);position:relative;padding:2.5rem 3rem;display:flex;flex-direction:column;justify-content:space-between;overflow:hidden}.blob{position:absolute;border-radius:50%;filter:blur(70px);opacity:.4;animation:float 14s infinite alternate}.b1{width:400px;height:400px;background:var(--amarillo);top:-80px;right:-80px}.b2{width:320px;height:320px;background:var(--rojo);bottom:-60px;left:-60px;animation-delay:-5s}@keyframes float{0%{transform:translate(0,0)}100%{transform:translate(25px,-30px) scale(1.1)}}.tribar{position:absolute;top:0;left:0;right:0;height:5px;background:linear-gradient(90deg,var(--rojo)33%,var(--amarillo)33%,var(--amarillo)66%,var(--blanco)66%)}.brand{display:flex;align-items:center;gap:14px;z-index:2;position:relative}.brand-logo{width:50px;height:50px;border-radius:12px;display:flex;align-items:center;justify-content:center;background:rgba(255,255,255,.15)}.brand-logo img{width:80%;height:80%;object-fit:contain}.brand-name{font-family:'Poppins',sans-serif;font-weight:900;color:var(--blanco);font-size:1.05rem}.brand-type{font-size:.7rem;color:var(--amarillo);font-weight:700;text-transform:uppercase}.hero{z-index:2;position:relative}.hero-tag{display:inline-flex;align-items:center;gap:6px;background:var(--amarillo);color:var(--azul);padding:5px 14px;border-radius:99px;font-size:.7rem;font-weight:800;text-transform:uppercase;margin-bottom:1rem}.hero-title{font-family:'Poppins',sans-serif;font-size:2.6rem;font-weight:900;color:var(--blanco);line-height:1.1;margin-bottom:1rem}.hero-title span{color:var(--amarillo)}.hero-desc{font-size:.9rem;color:rgba(255,255,255,.85);line-height:1.6;max-width:380px;margin-bottom:2rem}.features{display:grid;grid-template-columns:1fr 1fr;gap:10px;max-width:400px}.feat{background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);border-radius:14px;padding:.9rem;backdrop-filter:blur(8px);transition:transform .2s}.feat:hover{transform:translateY(-3px);background:rgba(255,255,255,.15)}.feat-i{width:36px;height:36px;border-radius:10px;background:var(--blanco);color:var(--azul);display:flex;align-items:center;justify-content:center;font-size:1rem;margin-bottom:8px}.feat-t{font-weight:700;color:var(--blanco);font-size:.8rem}.feat-d{font-size:.7rem;color:rgba(255,255,255,.7)}.footer-l{font-size:.72rem;color:rgba(255,255,255,.5);z-index:2;position:relative}.panel-right{background:var(--blanco);display:flex;flex-direction:column;justify-content:center;align-items:center;padding:2rem}.form-box{width:100%;max-width:400px}.role-sel{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:1.5rem}.role-btn{background:var(--blanco);border:2px solid var(--azul);border-radius:14px;padding:.9rem;text-align:center;cursor:pointer;text-decoration:none;display:flex;flex-direction:column;align-items:center;gap:8px;transition:all .2s}.role-btn:hover{transform:translateY(-2px);box-shadow:var(--sombra)}.role-ic{width:44px;height:44px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:1.2rem;background:var(--blanco);color:var(--azul);border:2px solid var(--azul)}.role-nm{font-size:.8rem;font-weight:800;color:var(--azul);text-transform:uppercase}.role-btn.active{border-color:var(--rojo);box-shadow:0 4px 0 var(--rojo)}.role-btn.active .role-ic{background:var(--rojo);color:var(--blanco);border-color:var(--rojo)}.role-btn.active .role-nm{color:var(--rojo)}.form-card{background:var(--blanco);border:3px solid var(--azul);border-radius:20px;padding:1.5rem;box-shadow:0 8px 0 var(--azul);margin-bottom:1rem;position:relative}.form-card::after{content:'';position:absolute;top:-3px;left:-3px;right:-3px;height:6px;background:var(--amarillo);border-radius:20px 20px 0 0}.form-hd{display:flex;align-items:center;gap:12px;margin-bottom:1.25rem;padding-bottom:1rem;border-bottom:2px solid var(--azul)}.form-ic{width:42px;height:42px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:1.1rem;background:var(--azul);color:var(--blanco)}.form-tt{font-family:'Poppins',sans-serif;font-size:1rem;font-weight:900;color:var(--azul);text-transform:uppercase}.form-st{font-size:.72rem;color:var(--azul);opacity:.7}.err{background:var(--rojo);color:var(--blanco);border-radius:10px;padding:10px 12px;font-size:.8rem;font-weight:700;display:flex;align-items:center;gap:8px;margin-bottom:1rem;animation:shake .3s}@keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-4px)}75%{transform:translateX(4px)}}.f-grp{margin-bottom:1rem}.f-lbl{display:block;font-size:.75rem;font-weight:800;color:var(--azul);text-transform:uppercase;margin-bottom:5px}.f-wrap{position:relative}.f-ic{position:absolute;left:14px;top:50%;transform:translateY(-50%);color:var(--azul);font-size:.9rem}.f-inp{width:100%;padding:12px 14px 12px 40px;border:2px solid var(--azul);border-radius:10px;font-size:.9rem;font-weight:600;color:var(--azul);background:var(--blanco);outline:none;transition:border-color .2s}.f-inp:focus{border-color:var(--amarillo);box-shadow:0 0 0 3px rgba(251,191,36,.2)}.f-inp::placeholder{color:rgba(11,11,147,.4)}.pwd-toggle{display:flex;align-items:center;gap:6px;margin-top:6px}.pwd-toggle input{accent-color:var(--azul);width:14px;height:14px;cursor:pointer}.pwd-toggle label{font-size:.72rem;color:var(--azul);font-weight:700;cursor:pointer}.btn-submit{width:100%;padding:14px;border:none;border-radius:12px;background:var(--azul);color:var(--blanco);font-family:'Poppins',sans-serif;font-size:.95rem;font-weight:800;text-transform:uppercase;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;transition:all .2s;position:relative;overflow:hidden;margin-top:.5rem}.btn-submit::before{content:'';position:absolute;top:0;left:-100%;width:50%;height:100%;background:linear-gradient(90deg,transparent,rgba(255,255,255,.3),transparent);transform:skewX(-20deg);animation:shine 3s infinite}@keyframes shine{0%{left:-100%}40%,100%{left:150%}}.btn-submit:hover{background:var(--amarillo);color:var(--azul);transform:translateY(-2px);box-shadow:0 8px 25px rgba(251,191,36,.4)}.btn-submit:active{transform:translateY(0)}.sec-chip{display:inline-flex;align-items:center;gap:6px;background:var(--blanco);border:2px solid var(--azul);border-radius:99px;padding:6px 14px;font-size:.7rem;color:var(--azul);font-weight:700;text-transform:uppercase}.dot{width:7px;height:7px;background:var(--rojo);border-radius:50%;animation:blink 1.5s infinite}@keyframes blink{0%,100%{opacity:1}50%{opacity:.5}}@media(max-width:900px){.login-wrapper{grid-template-columns:1fr}.panel-left{display:none}.panel-right{padding:1.5rem}.role-sel{grid-template-columns:1fr}}
+</style>
+<?php $rol = in_array($_GET['rol'] ?? '', ['director','profesor']) ? $_GET['rol'] : 'director'; ?>
+<div class="login-wrapper">
+  <div class="panel-left">
+    <div class="tribar"></div><div class="blob b1"></div><div class="blob b2"></div>
+    <div class="brand">
+      <div class="brand-logo"><?php if(file_exists(APPROOT.'/../public/img/logo.ui.png')): ?><img src="<?php echo URLROOT; ?>/img/logo.ui.png" alt="Logo"><?php else: ?><i class="fa-solid fa-graduation-cap" style="color:#fff;font-size:1.4rem"></i><?php endif; ?></div>
+      <div><div class="brand-name"><?php echo SITENAME; ?></div><div class="brand-type">I.E. Secundaria — Perú</div></div>
     </div>
+    <div class="hero">
+      <div class="hero-tag"><i class="fa-solid fa-shield-check"></i> Sistema 2026</div>
+      <h1 class="hero-title">Control de<br>Asistencia <span>QR Escolar</span></h1>
+      <p class="hero-desc">Plataforma digital para registro y seguimiento de asistencia mediante códigos QR.</p>
+      <div class="features">
+        <div class="feat"><div class="feat-i"><i class="fa-solid fa-qrcode"></i></div><div class="feat-t">Escáner QR</div><div class="feat-d">Identificación rápida</div></div>
+        <div class="feat"><div class="feat-i"><i class="fa-solid fa-chart-line"></i></div><div class="feat-t">Reportes</div><div class="feat-d">Estadísticas en vivo</div></div>
+        <div class="feat"><div class="feat-i"><i class="fa-solid fa-ticket"></i></div><div class="feat-t">Papeletas</div><div class="feat-d">Permisos digitales</div></div>
+        <div class="feat"><div class="feat-i"><i class="fa-solid fa-lock"></i></div><div class="feat-t">Seguro</div><div class="feat-d">Acceso por roles</div></div>
+      </div>
+    </div>
+    <div class="footer-l">© <?php echo date('Y'); ?> <?php echo SITENAME; ?> — Gestión Escolar</div>
+  </div>
+  <div class="panel-right">
+    <div class="form-box">
+      <div class="role-sel">
+        <a href="?rol=director" class="role-btn <?php echo $rol==='director'?'active':''; ?>"><div class="role-ic"><i class="fa-solid fa-user-tie"></i></div><div class="role-nm">Director</div><div style="font-size:.65rem;color:var(--azul);opacity:.7">Acceso total</div></a>
+        <a href="?rol=profesor" class="role-btn <?php echo $rol==='profesor'?'active':''; ?>"><div class="role-ic"><i class="fa-solid fa-chalkboard-user"></i></div><div class="role-nm">Docente</div><div style="font-size:.65rem;color:var(--azul);opacity:.7">Por aula</div></a>
+      </div>
+      <div class="form-card">
+        <div class="form-hd">
+          <div class="form-ic" style="background:<?php echo $rol==='director'?'var(--azul)':'var(--rojo)'; ?>"><i class="fa-solid fa-<?php echo $rol==='director'?'star':'apple-whole'; ?>"></i></div>
+          <div><div class="form-tt"><?php echo $rol==='director'?'Acceso Dirección':'Acceso Docente'; ?></div><div class="form-st"><?php echo $rol==='director'?'Administración completa':'Gestión de aula'; ?></div></div>
+        </div>
+        <?php if(!empty($data['error'])): ?><div class="err"><i class="fa-solid fa-triangle-exclamation"></i> <?php echo htmlspecialchars($data['error']); ?></div><?php endif; ?>
+        <form action="<?php echo URLROOT; ?>/usuarios/login" method="POST" autocomplete="off">
+          <input type="hidden" name="rol_hint" value="<?php echo $rol; ?>">
+          <div class="f-grp"><label class="f-lbl">Correo Institucional</label><div class="f-wrap"><i class="fa-solid fa-at f-ic"></i><input type="email" name="usuario" class="f-inp" value="<?php echo htmlspecialchars($data['usuario'] ?? ''); ?>" required placeholder="<?php echo $rol==='director'?'director@colegio.edu.pe':'docente@colegio.edu.pe'; ?>"></div></div>
+          <div class="f-grp"><label class="f-lbl">Contraseña</label><div class="f-wrap"><i class="fa-solid fa-lock f-ic"></i><input type="password" name="password" id="pwd" class="f-inp" required placeholder="••••••••"></div><div class="pwd-toggle"><input type="checkbox" id="show" onchange="document.getElementById('pwd').type=this.checked?'text':'password'"><label for="show">Mostrar</label></div></div>
+          <button type="submit" class="btn-submit"><i class="fa-solid fa-<?php echo $rol==='director'?'crown':'right-to-bracket'; ?>"></i> <?php echo $rol==='director'?'Ingresar como Director':'Ingresar como Docente'; ?></button>
+        </form>
+      </div>
+      <div style="text-align:center"><div class="sec-chip"><div class="dot"></div> Conexión segura</div></div>
+    </div>
+  </div>
 </div>
-
+<script>document.addEventListener('DOMContentLoaded',()=>{const f=document.querySelector('form'),b=document.querySelector('.btn-submit');if(f&&b){f.addEventListener('submit',()=>{b.classList.add('loading');b.disabled=true})}});</script>
 <?php require APPROOT . '/views/inc/footer.php'; ?>

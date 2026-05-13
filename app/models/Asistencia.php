@@ -25,6 +25,18 @@ class Asistencia {
         return $this->db->resultSet();
     }
 
+    public function getAttendanceByGrado() {
+        $this->db->query("
+            SELECT CONCAT(gs.grado, ' ', gs.seccion) as label, COUNT(a.id) as total
+            FROM grado_secciones gs
+            LEFT JOIN alumnos al ON al.grado_seccion_id = gs.id
+            LEFT JOIN asistencias a ON a.alumno_id = al.id AND a.fecha = CURRENT_DATE
+            GROUP BY gs.id
+            ORDER BY gs.grado, gs.seccion
+        ");
+        return $this->db->resultSet();
+    }
+
     public function getRecientes() {
         $this->db->query("
             SELECT a.nombres, a.apellidos, 'Asistencia' as tipo, ast.hora_entrada as hora, ast.fecha
