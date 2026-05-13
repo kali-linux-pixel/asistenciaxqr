@@ -60,10 +60,10 @@ class Mensajes extends Controller {
         $directorId = $_SESSION['user_id'];
 
         // Buscar los datos del profesor con el que hablará
-        $this->db = new Database; // Forma rápida temporal para cargar info de ese profesor
-        $this->db->query("SELECT id, nombre, usuario FROM usuarios WHERE id = :id AND rol = 'profesor' LIMIT 1");
-        $this->db->bind(':id', $profesorId);
-        $profesor = $this->db->single();
+        $db = new Database; // Forma rápida local para cargar info de ese profesor
+        $db->query("SELECT id, nombre, usuario FROM usuarios WHERE id = :id AND rol = 'profesor' LIMIT 1");
+        $db->bind(':id', $profesorId);
+        $profesor = $db->single();
 
         if (!$profesor) {
             flash('msg_bandeja', 'El docente no existe o fue removido.', 'alert alert-danger');
